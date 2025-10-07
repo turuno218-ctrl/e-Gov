@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ★ iframeへの文書表示ロジックを改善
+    // iframeへの文書表示ロジック
     function displayDocument(index) {
         const pair = documentPairs[index];
         originalFileName = pair.name.replace(/\.xml$/i, '');
@@ -107,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const xsltProcessor = new XSLTProcessor();
                 xsltProcessor.importStylesheet(xslDoc);
-                // XSLTResultを完全なHTMLドキュメントとして生成
                 const resultDocument = xsltProcessor.transformToDocument(xmlDoc);
                 
                 if (!resultDocument) {
@@ -117,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const serializer = new XMLSerializer();
                 const htmlString = serializer.serializeToString(resultDocument);
 
-                // iframeをリセットしてから書き込む
                 viewer.src = "about:blank";
                 viewer.onload = () => {
                     const iDoc = viewer.contentWindow.document;
@@ -125,14 +123,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     iDoc.write(htmlString);
                     iDoc.close();
                     
-                    // レンダリング完了を待ってから高さを調整
+                    // レンダリング完了を待ってから高さを調整し、スタイルを上書き
                     setTimeout(() => {
                         const body = iDoc.body;
                         if (body) {
+                            // ★★★ここからが修正箇所★★★
+                            // 問題となる特定のpreタグのスタイルを強制的に上書きする
+                            const problematicElements = body.querySelectorAll('pre.oshirase');
+                            problematicElements.forEach(el => {
+                                el.style.whiteSpace = 'pre-wrap'; // 自動で折り返すスタイル
+                                el.style.wordBreak = 'break-all';  // はみ出さないように強制改行
+                            });
+                            // ★★★ここまでが修正箇所★★★
+
                             viewer.style.height = body.scrollHeight + 'px';
                         }
                         resolve();
-                    }, 150); // レンダリングのための短い待機時間
+                    }, 150); 
                 };
                 viewerContainer.classList.remove('hidden');
 
@@ -146,10 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => {
                 alert(`文書の表示に失敗しました: ${error.message}`);
                 viewer.src = "about:blank";
-                const iDoc = viewer.contentWindow.document;
-                iDoc.open();
-                iDoc.write(`<p style="padding: 20px; color: red;">表示エラー</p>`);
-                iDoc.close();
+                viewer.contentWindow.document.write(`<p style="padding: 20px; color: red;">表示エラー</p>`);
                 viewerContainer.classList.remove('hidden');
                 showLoading(false);
             });
@@ -167,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingOverlay.classList.toggle('hidden', !show);
     }
     
-    // PDFダウンロード機能 (iframe対応)
+    // PDF/PNGダウンロード機能
     async function downloadAs(type) {
         const iframeDoc = viewer.contentDocument;
         if (!iframeDoc || !iframeDoc.body || iframeDoc.body.children.length === 0) {
@@ -177,11 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showLoading(true);
         try {
-            const targetElement = iframeDoc.documentElement; // <html>タグをキャプチャ対象に
+            const targetElement = iframeDoc.documentElement;
             const canvas = await html2canvas(targetElement, {
                 scale: 2,
                 useCORS: true,
-                // canvasのサイズをiframeの内容に合わせる
                 width: targetElement.scrollWidth,
                 height: targetElement.scrollHeight,
                 windowWidth: targetElement.scrollWidth,
