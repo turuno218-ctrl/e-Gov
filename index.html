@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XML公文書ビューア</title>
+    <title>かんたんXML公文書ビューア</title>
     <link rel="stylesheet" href="style.css">
-    <!-- ★ライブラリを最初の構成に戻す -->
+    <!-- PDF品質を最優先するため、jsPDF + html2canvas を使用 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -17,33 +17,23 @@
     </header>
 
     <main>
-        <div id="drop-zone">
-            <p>ここにZIPファイルをドラッグ＆ドロップ</p>
-            <p>または</p>
-            <label for="file-input" class="file-label">ファイルを選択</label>
-            <input type="file" id="file-input" accept=".zip">
+        <div id="upload-container">
+            <!-- ファイル選択UIはこの中に表示されます -->
         </div>
 
-        <div id="file-list-container" class="hidden">
-            <h3>表示するファイルを選択してください</h3>
-            <div id="file-list"></div>
-        </div>
-
-        <div id="controls" class="hidden">
-            <button id="download-pdf">📄 PDFでダウンロード</button>
-            <button id="download-png">🖼️ PNGで保存 (1ページ目のみ)</button>
-        </div>
-
-        <div id="viewer-container">
+        <div id="viewer-section" class="hidden">
+             <div id="controls">
+                <button id="download-pdf">📄 PDFでダウンロード</button>
+                <button id="download-png">🖼️ PNGで保存 (1ページ目のみ)</button>
+            </div>
             <div id="viewer-wrapper">
                 <div id="viewer">
-                    <div id="placeholder">
-                        <p>ZIPファイルをアップロードすると、ここにプレビューが表示されます。</p>
-                    </div>
+                    <!-- 変換結果はここに表示されます -->
                 </div>
             </div>
         </div>
-         <div id="loading" class="hidden">
+
+        <div id="loading" class="hidden">
             <div class="spinner"></div>
             <p>処理中です...</p>
         </div>

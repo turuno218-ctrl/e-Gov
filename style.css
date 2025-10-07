@@ -1,45 +1,208 @@
-/* 既存のCSSはそのまま */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
-#file-list-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    margin: 20px 0;
-    border: 1px solid var(--border-color);
-    text-align: center;
+:root {
+    --primary-color: #007bff;
+    --background-color: #f0f2f5;
+    --text-color: #333;
+    --border-color: #d9d9d9;
+    --paper-width: 210mm;
 }
 
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.7;
+}
+
+header {
+    background-color: white;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+header p {
+    margin: 0.5rem 0 0;
+    color: #666;
+    font-size: 1rem;
+}
+
+main {
+    padding: 2rem 1rem;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+/* アップロードエリア */
+#upload-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+#drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 6px;
+    padding: 3rem;
+    text-align: center;
+    cursor: pointer;
+    background-color: #fafafa;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+#drop-zone.dragover {
+    background-color: #e6f7ff;
+    border-color: var(--primary-color);
+}
+
+#drop-zone p {
+    margin: 0 0 1rem;
+    color: #555;
+    font-size: 1.1rem;
+}
+
+.file-label {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.file-label:hover {
+    background-color: #0056b3;
+}
+#file-input { display: none; }
+
+
+/* ファイル選択リスト */
+#file-list-container {
+    text-align: center;
+}
+#file-list-container h3 {
+    margin-top: 0;
+    font-weight: 500;
+    color: #444;
+}
 #file-list {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
 }
-
 #file-list button {
-    padding: 10px 15px;
-    font-size: 15px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
+    font-family: 'Noto Sans JP', sans-serif;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+    background-color: #f5f5f5;
+    border: 1px solid #d9d9d9;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
-
 #file-list button:hover {
     background-color: #e0e0e0;
     border-color: #999;
 }
+#file-list button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
 
-/* ★以下を追記 */
-#placeholder {
+
+/* ビューアセクション */
+#viewer-section {
+    margin-top: 2rem;
+}
+#controls {
+    text-align: center;
+    margin-bottom: 2rem;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100%;
-    color: #888;
-    text-align: center;
-    padding: 20px;
+    gap: 1rem;
+}
+#controls button {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 1rem;
+    padding: 0.8rem 1.8rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    color: white;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+#controls button:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+#controls #download-pdf { background-color: #28a745; }
+#controls #download-pdf:hover { background-color: #218838; }
+#controls #download-png { background-color: #17a2b8; }
+#controls #download-png:hover { background-color: #117a8b; }
+
+#viewer-wrapper {
+    padding: 30px;
+}
+#viewer {
+    width: var(--paper-width);
+    min-height: 297mm;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    overflow: visible;
+}
+
+.hidden { display: none !important; }
+
+/* ローディング */
+#loading {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    z-index: 9999;
+}
+.spinner {
+    border: 8px solid #f3f3f3; border-top: 8px solid var(--primary-color);
+    border-radius: 50%; width: 60px; height: 60px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+footer {
+    text-align: center; padding: 2rem 1rem; margin-top: 2rem;
+    color: #888; font-size: 0.9em;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 960px) {
+    #viewer-wrapper {
+        padding: 15px 0;
+        transform: scale(0.9);
+        transform-origin: top center;
+    }
+}
+@media (max-width: 768px) {
+    #viewer-wrapper { transform: scale(0.7); }
+}
+@media (max-width: 576px) {
+    header h1 { font-size: 1.5rem; }
+    #viewer-wrapper { transform: scale(0.5); }
 }
 
