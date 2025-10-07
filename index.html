@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XML公文書ビューア</title>
     <link rel="stylesheet" href="style.css">
-    <!-- ライブラリの読み込み -->
+    <!-- ★ライブラリを最初の構成に戻す -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -31,10 +31,9 @@
 
         <div id="controls" class="hidden">
             <button id="download-pdf">📄 PDFでダウンロード</button>
-            <button id="download-png">🖼️ PNGで保存</button>
+            <button id="download-png">🖼️ PNGで保存 (1ページ目のみ)</button>
         </div>
 
-        <!-- ★修正：常に表示されるようにし、案内文を復活 -->
         <div id="viewer-container">
             <div id="viewer-wrapper">
                 <div id="viewer">
