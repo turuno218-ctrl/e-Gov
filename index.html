@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML公文書ビューア</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>かんたんXML公文書ビューア</h1>
+        <p>ZIP形式（XML+XSL）の公文書ファイルをブラウザで表示・変換します。</p>
+    </header>
+
+    <main>
+        <div id="drop-zone">
+            <p>ここにZIPファイルをドラッグ＆ドロップ</p>
+            <p>または</p>
+            <label for="file-input" class="file-label">ファイルを選択</label>
+            <input type="file" id="file-input" accept=".zip">
+        </div>
+
+        <div id="controls" class="hidden">
+            <button id="download-pdf">📄 PDFでダウンロード</button>
+            <button id="download-png">🖼️ PNGで保存</button>
+        </div>
+
+        <div id="viewer-container">
+            <div id="viewer-wrapper">
+                <div id="viewer">
+                    <div id="placeholder">
+                        <p>ZIPファイルをアップロードすると、ここにプレビューが表示されます。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>処理中です...</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Your Name or Company. Powered by Google Gemini.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
