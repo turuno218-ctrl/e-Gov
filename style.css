@@ -1,6 +1,5 @@
 /* 既存のCSSはそのまま */
 
-/* ★以下を追記 */
 #file-list-container {
     background-color: #fff;
     padding: 20px;
@@ -33,6 +32,14 @@
     border-color: #999;
 }
 
-#viewer-container.hidden {
-    display: none;
+/* ★以下を追記 */
+#placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #888;
+    text-align: center;
+    padding: 20px;
 }
+

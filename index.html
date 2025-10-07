@@ -24,7 +24,6 @@
             <input type="file" id="file-input" accept=".zip">
         </div>
 
-        <!-- ★追加：ファイル選択エリア -->
         <div id="file-list-container" class="hidden">
             <h3>表示するファイルを選択してください</h3>
             <div id="file-list"></div>
@@ -35,10 +34,14 @@
             <button id="download-png">🖼️ PNGで保存</button>
         </div>
 
-        <div id="viewer-container" class="hidden">
+        <!-- ★修正：常に表示されるようにし、案内文を復活 -->
+        <div id="viewer-container">
             <div id="viewer-wrapper">
-                <!-- A4サイズの表示エリア -->
-                <div id="viewer"></div>
+                <div id="viewer">
+                    <div id="placeholder">
+                        <p>ZIPファイルをアップロードすると、ここにプレビューが表示されます。</p>
+                    </div>
+                </div>
             </div>
         </div>
          <div id="loading" class="hidden">
@@ -54,3 +57,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
