@@ -147,13 +147,17 @@ header h1 {
     padding: 30px;
     border: 1px solid #e8e8e8;
 }
+
+/* ★iframe用のスタイル調整 */
 #viewer {
     width: var(--paper-width);
     min-height: 297mm;
+    height: 842px; /* A4 height fallback */
+    display: block;
     margin: 0 auto;
     background-color: white;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    overflow: visible;
+    border: none;
 }
 
 

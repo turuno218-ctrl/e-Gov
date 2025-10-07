@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultSection = document.getElementById('result-section');
     const fileListContainer = document.getElementById('file-list');
     const viewerContainer = document.getElementById('viewer-container');
-    const viewer = document.getElementById('viewer');
+    const viewer = document.getElementById('viewer'); // now an iframe
     const downloadPdfBtn = document.getElementById('download-pdf');
     const downloadPngBtn = document.getElementById('download-png');
     const loadingOverlay = document.getElementById('loading');
@@ -70,34 +70,31 @@ document.addEventListener('DOMContentLoaded', () => {
         fileListContainer.innerHTML = '';
         viewerContainer.classList.add('hidden');
         
-        // ファイルリストのボタンを作成
         documentPairs.forEach((pair, index) => {
             const button = document.createElement('button');
             button.textContent = pair.name;
             button.dataset.index = index;
             button.addEventListener('click', e => {
                 displayDocument(index);
-                // 他のボタンのアクティブ状態を解除し、クリックしたボタンをアクティブにする
                 fileListContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
                 e.currentTarget.classList.add('active');
             });
             fileListContainer.appendChild(button);
         });
         
-        // 処理結果セクション全体を表示
         resultSection.classList.remove('hidden');
 
-        // ファイルが1つだけなら、それを自動で表示
         if (documentPairs.length === 1) {
             fileListContainer.querySelector('button').click();
         }
     }
 
-    // 文書をビューアに表示
+    // ★文書をiframeに表示するように変更
     function displayDocument(index) {
         const pair = documentPairs[index];
         originalFileName = pair.name.replace(/\.xml$/i, '');
-        
+        showLoading(true);
+
         try {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(pair.xml, "application/xml");
@@ -110,22 +107,30 @@ document.addEventListener('DOMContentLoaded', () => {
             xsltProcessor.importStylesheet(xslDoc);
             const resultDocument = xsltProcessor.transformToFragment(xmlDoc, document);
             
-            viewer.innerHTML = '';
-            if (resultDocument) {
-                viewer.appendChild(resultDocument);
-            } else {
+            if (!resultDocument) {
                 throw new Error("XSLT変換に失敗しました。");
             }
-            // ビューアセクションを表示
+
+            const serializer = new XMLSerializer();
+            const htmlString = serializer.serializeToString(resultDocument);
+
+            viewer.srcdoc = htmlString;
+            viewer.onload = () => {
+                const body = viewer.contentDocument.body;
+                // iframeの高さを内容に合わせて自動調整
+                viewer.style.height = body.scrollHeight + 'px';
+                showLoading(false);
+            };
+            
             viewerContainer.classList.remove('hidden');
         } catch(error) {
             alert(`文書の表示に失敗しました: ${error.message}`);
-            viewer.innerHTML = `<p style="padding: 20px; color: red;">表示エラー</p>`;
+            viewer.srcdoc = `<p style="padding: 20px; color: red;">表示エラー</p>`;
             viewerContainer.classList.remove('hidden');
+            showLoading(false);
         }
     }
 
-    // UIを初期状態に戻す
     function resetUI() {
         fileNameSpan.textContent = '選択されていません';
         fileInput.value = '';
@@ -138,8 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingOverlay.classList.toggle('hidden', !show);
     }
     
-    // PDFダウンロード機能
+    // ★PDFダウンロード機能を、iframeの内容を対象にするように変更
     downloadPdfBtn.addEventListener('click', async () => {
+        const iframeBody = viewer.contentDocument.body;
+        if (!iframeBody || iframeBody.children.length === 0) {
+            alert('表示されている文書がありません。');
+            return;
+        }
+
         showLoading(true);
         try {
             const { jsPDF } = window.jspdf;
@@ -147,9 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
 
-            const canvas = await html2canvas(viewer, {
+            const canvas = await html2canvas(iframeBody, {
                 scale: 2, useCORS: true,
-                windowWidth: viewer.scrollWidth, windowHeight: viewer.scrollHeight,
+                windowWidth: iframeBody.scrollWidth,
+                windowHeight: iframeBody.scrollHeight,
             });
 
             const contentHeight = canvas.height, contentWidth = canvas.width;
@@ -177,14 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // PNG保存機能
+    // ★PNG保存機能を、iframeの内容を対象にするように変更
     downloadPngBtn.addEventListener('click', async () => {
+        const iframeBody = viewer.contentDocument.body;
+        if (!iframeBody || iframeBody.children.length === 0) {
+            alert('表示されている文書がありません。');
+            return;
+        }
+
         showLoading(true);
         try {
-            const canvas = await html2canvas(viewer, {
+            const canvas = await html2canvas(iframeBody, {
                 scale: 2, useCORS: true,
-                width: viewer.clientWidth, height: (viewer.clientWidth / 210) * 297,
-                windowHeight: (viewer.clientWidth / 210) * 297,
+                width: iframeBody.clientWidth, 
+                height: (iframeBody.clientWidth / 210) * 297, // A4 aspect ratio
+                windowHeight: (iframeBody.clientWidth / 210) * 297,
             });
             const link = document.createElement('a');
             link.download = `${originalFileName}_page1.png`;
