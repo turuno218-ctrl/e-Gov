@@ -1,48 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM要素の取得
-    const uploadContainer = document.getElementById('upload-container');
-    const viewerSection = document.getElementById('viewer-section');
-    const controls = document.getElementById('controls');
+    const fileInput = document.getElementById('file-input');
+    const fileNameSpan = document.getElementById('file-name');
+    const resultSection = document.getElementById('result-section');
+    const fileListContainer = document.getElementById('file-list');
+    const viewerContainer = document.getElementById('viewer-container');
     const viewer = document.getElementById('viewer');
     const downloadPdfBtn = document.getElementById('download-pdf');
     const downloadPngBtn = document.getElementById('download-png');
     const loadingOverlay = document.getElementById('loading');
     
     let documentPairs = [];
-    let currentPair = null;
     let originalFileName = 'document';
 
-    // 初期UIの描画
-    const dropZoneHTML = `
-        <div id="drop-zone">
-            <p>ここにZIPファイルをドラッグ＆ドロップ</p>
-            <p>または</p>
-            <label for="file-input" class="file-label">ファイルを選択</label>
-            <input type="file" id="file-input" accept=".zip" class="hidden">
-        </div>`;
+    // ファイルが選択されたときの処理
+    fileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) {
+            fileNameSpan.textContent = file.name;
+            handleFile(file);
+        }
+    });
 
-    function renderInitialUI() {
-        uploadContainer.innerHTML = dropZoneHTML;
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', e => {
-            if (e.target.files.length > 0) handleFile(e.target.files[0]);
-        });
-        dropZone.addEventListener('click', () => fileInput.click());
-    }
-
-    // ファイル処理
+    // ファイル処理のメイン関数
     async function handleFile(file) {
         if (!file.name.endsWith('.zip')) {
             alert('ZIPファイルをアップロードしてください。');
+            resetUI();
             return;
         }
         showLoading(true);
@@ -58,7 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (match && match[1]) {
                     const xslFileName = match[1];
                     const xslFile = Object.values(zip.files).find(e => !e.dir && e.name.toLowerCase().endsWith(xslFileName.toLowerCase()));
-                    if (xslFile) return { name: xmlFile.name, xml: await xmlFile.async('string'), xsl: await xslFile.async('string') };
+                    if (xslFile) return { 
+                        name: xmlFile.name, 
+                        xml: await xmlFile.async('string'), 
+                        xsl: await xslFile.async('string') 
+                    };
                 }
                 return null;
             }));
@@ -66,69 +54,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (documentPairs.length === 0) throw new Error('処理可能なXMLとXSLのペアが見つかりませんでした。');
             
-            if (documentPairs.length === 1) {
-                currentPair = documentPairs[0];
-                displayDocument();
-                uploadContainer.classList.add('hidden');
-            } else {
-                showFileSelection();
-            }
+            renderResultUI();
+
         } catch (error) {
             console.error('エラー:', error);
             alert(`処理中にエラーが発生しました: ${error.message}`);
-            renderInitialUI();
+            resetUI();
         } finally {
             showLoading(false);
         }
     }
-
-    // 複数ファイル選択UIの表示
-    function showFileSelection() {
-        let buttonsHTML = documentPairs.map((pair, index) => 
-            `<button data-index="${index}">${pair.name}</button>`
-        ).join('');
-
-        uploadContainer.innerHTML = `
-            <div id="file-list-container">
-                <h3>表示するファイルを選択してください</h3>
-                <div id="file-list">${buttonsHTML}</div>
-            </div>`;
-
-        const fileList = document.getElementById('file-list');
-        fileList.addEventListener('click', e => {
-            if (e.target.tagName === 'button') {
-                const index = e.target.dataset.index;
-                currentPair = documentPairs[index];
-                
-                // 選択されたボタンをハイライト
-                fileList.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-
-                displayDocument();
-            }
+    
+    // 処理結果エリアのUIを構築
+    function renderResultUI() {
+        fileListContainer.innerHTML = '';
+        viewerContainer.classList.add('hidden');
+        
+        // ファイルリストのボタンを作成
+        documentPairs.forEach((pair, index) => {
+            const button = document.createElement('button');
+            button.textContent = pair.name;
+            button.dataset.index = index;
+            button.addEventListener('click', e => {
+                displayDocument(index);
+                // 他のボタンのアクティブ状態を解除し、クリックしたボタンをアクティブにする
+                fileListContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+            });
+            fileListContainer.appendChild(button);
         });
+        
+        // 処理結果セクション全体を表示
+        resultSection.classList.remove('hidden');
+
+        // ファイルが1つだけなら、それを自動で表示
+        if (documentPairs.length === 1) {
+            fileListContainer.querySelector('button').click();
+        }
     }
 
     // 文書をビューアに表示
-    function displayDocument() {
-        originalFileName = currentPair.name.replace(/\.xml$/i, '');
+    function displayDocument(index) {
+        const pair = documentPairs[index];
+        originalFileName = pair.name.replace(/\.xml$/i, '');
         
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(currentPair.xml, "application/xml");
-        const xslDoc = parser.parseFromString(currentPair.xsl, "application/xml");
-        if (xmlDoc.getElementsByTagName("parsererror").length || xslDoc.getElementsByTagName("parsererror").length) {
-            throw new Error("XMLまたはXSLのパースに失敗しました。");
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(pair.xml, "application/xml");
+            const xslDoc = parser.parseFromString(pair.xsl, "application/xml");
+            if (xmlDoc.getElementsByTagName("parsererror").length || xslDoc.getElementsByTagName("parsererror").length) {
+                throw new Error("XMLまたはXSLのパースに失敗しました。");
+            }
+            
+            const xsltProcessor = new XSLTProcessor();
+            xsltProcessor.importStylesheet(xslDoc);
+            const resultDocument = xsltProcessor.transformToFragment(xmlDoc, document);
+            
+            viewer.innerHTML = '';
+            if (resultDocument) {
+                viewer.appendChild(resultDocument);
+            } else {
+                throw new Error("XSLT変換に失敗しました。");
+            }
+            // ビューアセクションを表示
+            viewerContainer.classList.remove('hidden');
+        } catch(error) {
+            alert(`文書の表示に失敗しました: ${error.message}`);
+            viewer.innerHTML = `<p style="padding: 20px; color: red;">表示エラー</p>`;
+            viewerContainer.classList.remove('hidden');
         }
-        
-        const xsltProcessor = new XSLTProcessor();
-        xsltProcessor.importStylesheet(xslDoc);
-        const resultDocument = xsltProcessor.transformToFragment(xmlDoc, document);
-        
-        viewer.innerHTML = '';
-        if (resultDocument) viewer.appendChild(resultDocument);
-        else throw new Error("XSLT変換に失敗しました。");
-        
-        viewerSection.classList.remove('hidden');
+    }
+
+    // UIを初期状態に戻す
+    function resetUI() {
+        fileNameSpan.textContent = '選択されていません';
+        fileInput.value = '';
+        resultSection.classList.add('hidden');
+        fileListContainer.innerHTML = '';
+        viewerContainer.classList.add('hidden');
     }
 
     function showLoading(show) {
@@ -166,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentHeight += pageHeightInCanvas;
             }
             pdf.save(`${originalFileName}.pdf`);
-
         } catch (err) {
             console.error("PDF生成エラー:", err);
             alert(`PDFの生成に失敗しました。\nエラー: ${err.message || '不明なエラー'}`);
@@ -195,8 +197,5 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading(false);
         }
     });
-    
-    // 初期化
-    renderInitialUI();
 });
 

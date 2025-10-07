@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>かんたんXML公文書ビューア</title>
+    <title>公文書ビューア - e-Govの公文書ファイルをPDF・画像で保存</title>
     <link rel="stylesheet" href="style.css">
     <!-- PDF品質を最優先するため、jsPDF + html2canvas を使用 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -11,37 +11,66 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1>かんたんXML公文書ビューア</h1>
-        <p>ZIP形式（XML+XSL）の公文書ファイルをブラウザで表示・変換します。</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>公文書ビューア - e-Govの公文書ファイルをPDF・画像で保存</h1>
+        </header>
 
-    <main>
-        <div id="upload-container">
-            <!-- ファイル選択UIはこの中に表示されます -->
-        </div>
-
-        <div id="viewer-section" class="hidden">
-             <div id="controls">
-                <button id="download-pdf">📄 PDFでダウンロード</button>
-                <button id="download-png">🖼️ PNGで保存 (1ページ目のみ)</button>
-            </div>
-            <div id="viewer-wrapper">
-                <div id="viewer">
-                    <!-- 変換結果はここに表示されます -->
+        <main>
+            <section class="card">
+                <h2>公文書ビューアの使い方</h2>
+                <ol>
+                    <li>「ファイルを選択」ボタンをクリックしてZIP形式の公文書ファイルを選択してください。</li>
+                    <li>ZIP内のXMLファイルが自動的に変換され、一覧に表示されます。</li>
+                    <li>表示したい文書のファイル名をクリックすると、プレビューが表示されます。</li>
+                    <li>文書が表示されたら、以下のいずれかの方法で保存できます。
+                        <ul>
+                            <li><b>PDFとしてダウンロード:</b> 「PDFとしてダウンロード」ボタンをクリック ※PDFでうまく保存されない場合は「画像として保存」をご利用ください</li>
+                            <li><b>画像として保存:</b> 「画像として保存」ボタンをクリック</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p class="note">変換はブラウザ上で行うため、公文書ファイルが外部に送信、保存されることはありません。<br>お使いのブラウザによっては表示が崩れる場合がございますので予めご了承ください。</p>
+                
+                <div class="upload-area">
+                    <label for="file-input" class="file-label">ファイルを選択</label>
+                    <input type="file" id="file-input" accept=".zip">
+                    <span id="file-name">選択されていません</span>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div id="loading" class="hidden">
-            <div class="spinner"></div>
-            <p>処理中です...</p>
-        </div>
-    </main>
+            <section id="result-section" class="card hidden">
+                <h2>変換した公文書一覧</h2>
+                <div id="file-list">
+                    <!-- 複数ファイルの場合、ここにボタンが挿入されます -->
+                </div>
 
-    <footer>
-        <p>&copy; 2025 Your Name or Company. Powered by Google Gemini.</p>
-    </footer>
+                <div id="viewer-container" class="hidden">
+                    <div class="viewer-header">
+                        <h2>変換した公文書表示</h2>
+                        <div id="controls">
+                            <button id="download-pdf">📄 PDFでダウンロード</button>
+                            <button id="download-png">🖼️ 画像として保存 (1ページ目のみ)</button>
+                        </div>
+                    </div>
+                    <div id="viewer-wrapper">
+                        <div id="viewer">
+                            <!-- 変換結果はここに表示されます -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>運営会社 | お問い合わせ</p>
+        </footer>
+    </div>
+
+    <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p>処理中です...</p>
+    </div>
 
     <script src="script.js"></script>
 </body>
