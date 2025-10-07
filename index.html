@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XML公文書ビューア</title>
     <link rel="stylesheet" href="style.css">
+    <!-- ライブラリの読み込み -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -23,18 +24,21 @@
             <input type="file" id="file-input" accept=".zip">
         </div>
 
+        <!-- ★追加：ファイル選択エリア -->
+        <div id="file-list-container" class="hidden">
+            <h3>表示するファイルを選択してください</h3>
+            <div id="file-list"></div>
+        </div>
+
         <div id="controls" class="hidden">
             <button id="download-pdf">📄 PDFでダウンロード</button>
             <button id="download-png">🖼️ PNGで保存</button>
         </div>
 
-        <div id="viewer-container">
+        <div id="viewer-container" class="hidden">
             <div id="viewer-wrapper">
-                <div id="viewer">
-                    <div id="placeholder">
-                        <p>ZIPファイルをアップロードすると、ここにプレビューが表示されます。</p>
-                    </div>
-                </div>
+                <!-- A4サイズの表示エリア -->
+                <div id="viewer"></div>
             </div>
         </div>
          <div id="loading" class="hidden">

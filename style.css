@@ -1,188 +1,38 @@
-:root {
-    --primary-color: #007bff;
-    --background-color: #f4f7f9;
-    --text-color: #333;
-    --border-color: #ddd;
-    --paper-width: 210mm;
-    --paper-height: 297mm;
-}
+/* 既存のCSSはそのまま */
 
-body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    line-height: 1.6;
-}
-
-header {
-    background-color: white;
-    text-align: center;
-    padding: 20px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-header h1 {
-    margin: 0;
-    color: var(--primary-color);
-}
-
-main {
-    padding: 20px;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-#drop-zone {
-    border: 3px dashed var(--border-color);
-    border-radius: 10px;
-    padding: 40px;
-    text-align: center;
-    cursor: pointer;
+/* ★以下を追記 */
+#file-list-container {
     background-color: #fff;
-    transition: background-color 0.2s;
-}
-
-#drop-zone.dragover {
-    background-color: #e9f5ff;
-    border-color: var(--primary-color);
-}
-
-.file-label {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.file-label:hover {
-    background-color: #0056b3;
-}
-
-#file-input {
-    display: none;
-}
-
-#controls {
-    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
     margin: 20px 0;
+    border: 1px solid var(--border-color);
+    text-align: center;
 }
 
-#controls button {
-    font-size: 16px;
-    padding: 12px 25px;
-    margin: 0 10px;
-    border: none;
+#file-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#file-list button {
+    padding: 10px 15px;
+    font-size: 15px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
     border-radius: 5px;
     cursor: pointer;
-    background-color: #28a745;
-    color: white;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
-#controls button:hover {
-    background-color: #218838;
+#file-list button:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
 }
 
-#controls #download-png {
-    background-color: #17a2b8;
-}
-#controls #download-png:hover {
-    background-color: #117a8b;
-}
-
-#viewer-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-#viewer-wrapper {
-    background-color: #525659;
-    padding: 30px;
-    border-radius: 5px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-#viewer {
-    width: var(--paper-width);
-    height: var(--paper-height);
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    overflow: auto; /* 内容がはみ出た場合にスクロール */
-}
-
-#placeholder {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    color: #888;
-    text-align: center;
-    padding: 20px;
-}
-
-.hidden {
-    display: none !important;
-}
-
-#loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-.spinner {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid var(--primary-color);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-
-footer {
-    text-align: center;
-    padding: 20px;
-    margin-top: 40px;
-    color: #777;
-    font-size: 0.9em;
-}
-
-/* 画面が小さい場合のA4表示調整 */
-@media (max-width: 900px) {
-    #viewer-wrapper {
-        padding: 15px;
-    }
-    #viewer {
-        transform-origin: top center;
-        transform: scale(0.8);
-    }
-}
-@media (max-width: 700px) {
-    #viewer {
-        transform: scale(0.6);
-    }
-}
-@media (max-width: 500px) {
-    #viewer {
-        transform: scale(0.4);
-    }
+#viewer-container.hidden {
+    display: none;
 }
