@@ -125,21 +125,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // レンダリング完了を待ってから高さを調整し、スタイルを上書き
                     setTimeout(() => {
-                        const body = iDoc.body;
-                        if (body) {
+                        const iHead = iDoc.head;
+                        const iBody = iDoc.body;
+                        if (iHead && iBody) {
                             // ★★★ここからが修正箇所★★★
-                            // 問題となる特定のpreタグのスタイルを強制的に上書きする
-                            const problematicElements = body.querySelectorAll('pre.oshirase');
-                            problematicElements.forEach(el => {
-                                el.style.whiteSpace = 'pre-wrap'; // 自動で折り返すスタイル
-                                el.style.wordBreak = 'break-all';  // はみ出さないように強制改行
-                            });
+                            // はみ出し防止用のスタイルをiframeのheadに直接注入する
+                            const style = iDoc.createElement('style');
+                            style.textContent = `
+                                pre.oshirase {
+                                    white-space: pre-wrap !important; /* 自動で折り返す */
+                                    word-break: break-word !important;   /* 単語の途中でも改行 */
+                                    overflow-wrap: break-word !important; /* 同上 */
+                                }
+                            `;
+                            iHead.appendChild(style);
                             // ★★★ここまでが修正箇所★★★
 
-                            viewer.style.height = body.scrollHeight + 'px';
+                            viewer.style.height = iBody.scrollHeight + 'px';
                         }
                         resolve();
-                    }, 150); 
+                    }, 100); 
                 };
                 viewerContainer.classList.remove('hidden');
 
